@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SQL Task Selector</title>
+  <style>
+    body{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center ;
+        background-color: black;
+        color: antiquewhite;
+    }
+  </style>
+</head>
+<body>
+  <h1>Select an SQL Task</h1>
+  <div>
+  <form id="taskForm">
+    <label for="taskSelect">Choose a Task:</label>
+    <select id="taskSelect" name="task" required>
+      <option value="">-- Please select a task --</option>
+
+      <option value="fetch_product_sentiment_breakdown">Fetch product-wise sentiment breakdown</option>
+      <option value="top_5_customers_feedback">Top 5 customers by feedback count</option>
+      <option value="daily_feedback_report">Daily feedback sentiment report</option>
+      <option value="product_sentiment_analysis">Product-wise sentiment analysis</option>
+      <option value="country_feedback_distribution">Country-wise feedback distribution</option>
+      <option value="products_highest_positive_feedback">Products with highest positive feedback</option>
+      <option value="customers_most_feedback">Customers giving most feedback</option>
+      <option value="average_sentiment_per_category">Average sentiment per product category</option>
+      <option value="feedback_with_customer_product_info">Feedback details with customer and product info</option>
+      <option value="sentiment_trend_per_product">Sentiment trend over time per product</option>
+      <option value="feedback_sentiment_by_country">Feedback sentiment by country</option>
+    </select>
+    <br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+  </div>
+  
+  <div id="result" style="margin-top:20px;"></div>
+
+  <script>
+  // Allow only requests from localhost:3020
+
+    document.getElementById('taskForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const selectedTask = document.getElementById('taskSelect').value;
+
+      if (selectedTask) {
+        const response = await fetch('http://localhost:3020/api/run-query', {
+           method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({ task: selectedTask })  // Sending the selected task to the backend
+        });
+
+        
+        const data = await response.json();
+
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = '<h3>Results:</h3>';
+
+        if (data.length === 0) {
+          resultDiv.innerHTML += '<p>No data found.</p>';
+        } else {
+          let table = '<table border="1" cellpadding="5"><tr>';
+          for (let key in data[0]) {
+            table += `<th>${key}</th>`;
+          }
+          table += '</tr>';
+
+          data.forEach(row => {
+            table += '<tr>';
+            for (let key in row) {
+              table += `<td>${row[key]}</td>`;
+            }
+            table += '</tr>';
+          });
+          table += '</table>';
+          resultDiv.innerHTML += table;
+        }
+      } else {
+        alert('Please select a task.');
+      }
+    });
+  </script>
+</body>
+</html>
